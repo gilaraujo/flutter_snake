@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_snake/src/snake_enums/snake_enums.dart';
 import 'package:flutter_snake/src/utils/utils.dart';
 
@@ -20,9 +19,16 @@ class SnakeBoard {
   /// Number of case horizontally (y)
   final int numberCaseVertically;
 
+  /// Whether or not bombs are enabled
+  final bool bombEnabled;
+
+  int bombSpawnController = 0;
+  Random rng = new Random();
+
   SnakeBoard({
     required this.numberCaseHorizontally,
     required this.numberCaseVertically,
+    required this.bombEnabled,
   }) {
     /// Instanciate the board
     _initBoard();
@@ -116,18 +122,72 @@ class SnakeBoard {
     SNAKE_DIRECTION direction;
 
     /// Check his direction
+    int newX = _snake.posX;
+    int newY = _snake.posY;
     if (_snake.next!.posX == _snake.posX) {
       if (_snake.next!.posY < _snake.posY) {
         direction = SNAKE_DIRECTION.down;
+        switch (move) {
+          case SNAKE_MOVE.front:
+            newY = _snake.posY + 1;
+            break;
+          case SNAKE_MOVE.right:
+            newX = _snake.posX - 1;
+            break;
+          case SNAKE_MOVE.left:
+            newX = _snake.posX + 1;
+        }
       } else {
         direction = SNAKE_DIRECTION.up;
+        switch (move) {
+          case SNAKE_MOVE.front:
+            newY = _snake.posY - 1;
+            break;
+          case SNAKE_MOVE.right:
+            newX = _snake.posX + 1;
+            break;
+          case SNAKE_MOVE.left:
+            newX = _snake.posX - 1;
+        }
       }
     } else {
       if (_snake.next!.posX < _snake.posX) {
+        // hit a wall directly
         direction = SNAKE_DIRECTION.right;
+        switch (move) {
+          case SNAKE_MOVE.front:
+            newX = _snake.posX + 1;
+            break;
+          case SNAKE_MOVE.right:
+            newY = _snake.posY + 1;
+            break;
+          case SNAKE_MOVE.left:
+            newY = _snake.posY - 1;
+        }
       } else {
         direction = SNAKE_DIRECTION.left;
+        switch (move) {
+          case SNAKE_MOVE.front:
+            newX = _snake.posX - 1;
+            break;
+          case SNAKE_MOVE.right:
+            newY = _snake.posY - 1;
+            break;
+          case SNAKE_MOVE.left:
+            newY = _snake.posY + 1;
+        }
       }
+    }
+    // hit a wall
+    if (_outOfMap(newX, newY)) {
+      return GAME_EVENT.out_of_map;
+    }
+    // hit a bomb
+    if (_hitBomb(newX, newY)) {
+      return GAME_EVENT.hit_bomb;
+    }
+    if (_ouroboros(newX, newY)) {
+      return GAME_EVENT.hit_his_tail;
     }
     if (_board[_snake.posY][_snake.posX].caseType == CASE_TYPE.food) {
       /// Add a new part of the snake if the head is on a food
@@ -157,42 +217,43 @@ class SnakeBoard {
       _snakeMoveFront(direction);
     }
 
-    /// Check if the snake go out of the map
-    if (_snake.posX < 0 ||
-        _snake.posX >= numberCaseHorizontally ||
-        _snake.posY < 0 ||
-        _snake.posY >= numberCaseVertically) {
-      return GAME_EVENT.out_of_map;
-    }
-
-    /// Check if the snake hit his tail and update the board
+    /// Update the board
     return _updateBoard() ?? event;
   }
 
   /// Update the board
   GAME_EVENT? _updateBoard() {
-    bool hitHisTail = false;
     for (List<BoardCase> boardLine in _board) {
       for (BoardCase boardCase in boardLine) {
         boardCase.partSnake = null;
       }
     }
     SnakePart? snakeTmp = _snake;
-    while (snakeTmp != null && getCase(snakeTmp.posY, snakeTmp.posX) != null) {
-      if (_board[snakeTmp.posY][snakeTmp.posX].partSnake != null) {
-        hitHisTail = true;
-      }
+    while (snakeTmp != null) {
       if (snakeTmp.next == null) {
         _board[snakeTmp.posY][snakeTmp.posX].caseType = CASE_TYPE.empty;
       }
       _board[snakeTmp.posY][snakeTmp.posX].partSnake = snakeTmp;
+
       snakeTmp = snakeTmp.next;
     }
-    return hitHisTail ? GAME_EVENT.hit_his_tail : _manageFood();
+    return _manageFood();
+  }
+
+  bool _outOfMap(int x, int y) {
+    return x < 0 || x == numberCaseHorizontally || y < 0 || y == numberCaseVertically;
+  }
+
+  bool _hitBomb(int x, int y) {
+    return _board[y][x].caseType == CASE_TYPE.bomb;
+  }
+
+  bool _ouroboros(int x, int y) {
+    return _board[y][x].partSnake?.type == SNAKE_BODY.body;
   }
 
   /// Manage the food and his apparition
-  _manageFood() {
+  GAME_EVENT? _manageFood() {
     List<BoardCase> emptyCases = [];
     int nbFood = 0;
 
@@ -209,12 +270,34 @@ class SnakeBoard {
     }
     if (nbFood == 0) {
       /// Place a food on a empty case randomly
-      var rng = new Random();
       emptyCases[rng.nextInt(emptyCases.length)].caseType = CASE_TYPE.food;
+    }
+    if (bombEnabled) {
+      bombSpawnController++;
+      if (bombSpawnController % 60 == 0) {
+        // despawn bomb
+        for (List<BoardCase> boardLine in _board) {
+          for (BoardCase boardCase in boardLine) {
+            if (boardCase.caseType == CASE_TYPE.bomb) {
+              boardCase.caseType = CASE_TYPE.empty;
+            }
+          }
+        }
+      } else {
+        if (emptyCases.length > (numberCaseHorizontally * numberCaseVertically * 0.2) && bombSpawnController % 30 == 0) {
+          // spawn bomb
+          int bombIdx = -1;
+          do {
+            bombIdx = rng.nextInt(emptyCases.length);
+          } while (emptyCases[bombIdx].caseType != CASE_TYPE.empty);
+          emptyCases[bombIdx].caseType = CASE_TYPE.bomb;
+        }
+      }
     }
     if (emptyCases.isEmpty) {
       return GAME_EVENT.win;
     }
+    return null;
   }
 
   /// Init the board with empty case

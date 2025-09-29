@@ -42,6 +42,8 @@ class SnakeGame extends StatefulWidget {
   final String? snakeBodyTurnImgPath;
   final String? snakeTailImgPath;
   final String? snakeFruitImgPath;
+  final String? snakeBombImgPath;
+  final bool bombEnabled;
 
   SnakeGame({
     Key? key,
@@ -57,6 +59,8 @@ class SnakeGame extends StatefulWidget {
     this.snakeTailImgPath,
     this.snakeFruitImgPath,
     this.snakeHeadImgPath,
+    this.snakeBombImgPath,
+    this.bombEnabled = false,
   }) : super(
           key: key,
         ) {
@@ -87,6 +91,7 @@ class _SnakeGameState extends State<SnakeGame> {
     _board = SnakeBoard(
       numberCaseHorizontally: widget.numberCaseHorizontally,
       numberCaseVertically: widget.numberCaseVertically,
+      bombEnabled: widget.bombEnabled,
     );
 
     /// Init the controller
@@ -125,7 +130,8 @@ class _SnakeGameState extends State<SnakeGame> {
       /// Check if the game is finished
       if (event == GAME_EVENT.win ||
           event == GAME_EVENT.hit_his_tail ||
-          event == GAME_EVENT.out_of_map) {
+          event == GAME_EVENT.out_of_map ||
+          event == GAME_EVENT.hit_bomb) {
         timer?.cancel();
         timer = null;
       }
@@ -142,7 +148,7 @@ class _SnakeGameState extends State<SnakeGame> {
     );
   }
 
-  /// Look all the board and print it (Board first, the the snake / fruit)
+  /// Look all the board and print it (Board first, then the snake / fruit)
   Column _printBoard() {
     List<Widget> items = [];
     int y = 0;
@@ -174,6 +180,11 @@ class _SnakeGameState extends State<SnakeGame> {
             defaultImg = widget.snakeFruitImgPath == null;
             imgIcon =
                 widget.snakeFruitImgPath ?? "assets/default_snake_fruit.png";
+            break;
+          case CASE_TYPE.bomb:
+            defaultImg = widget.snakeBombImgPath == null;
+            imgIcon =
+                widget.snakeBombImgPath ?? "assets/default_snake_bomb.png";
             break;
           default:
         }

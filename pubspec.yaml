@@ -26,6 +26,7 @@ flutter:
     - assets/default_snake_head.png
     - assets/default_snake_tail.png
     - assets/default_snake_turn.png
+    - assets/default_snake_bomb.png
   # To add assets to your package, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
