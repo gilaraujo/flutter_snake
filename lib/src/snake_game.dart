@@ -33,10 +33,10 @@ class SnakeGame extends StatefulWidget {
   final Duration durationBetweenTicks;
 
   /// Number of case horizontally (x)
-  final int numberCaseHorizontally;
+  int numberCaseHorizontally;
 
   /// Number of case vertically (y)
-  final int numberCaseVertically;
+  int numberCaseVertically;
 
   /// If defines, the controller stream receive the game event
   final StreamController<GAME_EVENT>? controllerEvent;
