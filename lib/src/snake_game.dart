@@ -137,8 +137,9 @@ class _SnakeGameState extends State<SnakeGame> {
   }
 
   void pause() {
-    if (timer?.isActive ?? false) {
-      timer?.cancel();
+    if (timer != null) {
+      timer!.cancel();
+      timer = null;
     } else {
       _initTimer();
     }
