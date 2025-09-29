@@ -22,6 +22,9 @@ class SnakeGame extends StatefulWidget {
   void restart() {
     state.initialize();
   }
+  void pause() {
+    state.pause();
+  }
 
   /// Case width / height (It's a square)
   double caseWidth;
@@ -118,10 +121,22 @@ class _SnakeGameState extends State<SnakeGame> {
 
     /// Defines the loop for the game
     timer?.cancel();
+    _initTimer();
+  }
+
+  void _initTimer() {
     timer = Timer.periodic(widget.durationBetweenTicks, (Timer t) {
       controller?.add(widget.getDirection);
       widget.nextDirection = SNAKE_MOVE.front;
     });
+  }
+
+  void pause() {
+    if (timer?.isActive ?? false) {
+      timer?.cancel();
+    } else {
+      _initTimer();
+    }
   }
 
   @override

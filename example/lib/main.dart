@@ -81,6 +81,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 Text("SNAKE"),
                 IconButton(
+                  onPressed: () => snakeGame?.pause(),
+                  icon: Icon(Icons.pause),
+                ),
+                IconButton(
                   onPressed: () => snakeGame?.nextDirection = SNAKE_MOVE.right,
                   icon: Icon(Icons.subdirectory_arrow_right),
                 ),
