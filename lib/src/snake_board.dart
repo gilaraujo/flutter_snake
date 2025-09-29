@@ -35,28 +35,18 @@ class SnakeBoard {
 
     /// Create the snake
     _snake = new SnakePart(
-        type: SNAKE_BODY.head, posY: numberCaseVertically ~/ 2, posX: 5);
+        type: SNAKE_BODY.head, posY: numberCaseVertically ~/ 2, posX: 2);
     _snake.next = new SnakePart(
         type: SNAKE_BODY.body,
         posY: numberCaseVertically ~/ 2,
-        posX: 4,
+        posX: 1,
         previous: _snake);
     _snake.next!.next = new SnakePart(
-        type: SNAKE_BODY.body,
-        posY: numberCaseVertically ~/ 2,
-        posX: 3,
-        previous: _snake.next!);
-    _snake.next!.next!.next = new SnakePart(
-        type: SNAKE_BODY.body,
-        posY: numberCaseVertically ~/ 2,
-        posX: 2,
-        previous: _snake.next!.next!);
-    _snake.next!.next!.next!.next = new SnakePart(
         type: SNAKE_BODY.tail,
         posY: numberCaseVertically ~/ 2,
-        posX: 1,
-        previous: _snake.next!.next!.next!);
-    _tail = _snake.next!.next!.next!.next!;
+        posX: 0,
+        previous: _snake.next!);
+    _tail = _snake.next!.next!;
 
     /// Update the board with the snake
     _updateBoard();

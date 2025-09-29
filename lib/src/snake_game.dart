@@ -17,6 +17,12 @@ class SnakeGame extends StatefulWidget {
   /// Get the next direction the snake will take on the next tick
   SNAKE_MOVE get getDirection => _direction ?? SNAKE_MOVE.front;
 
+  late _SnakeGameState state;
+
+  void restart() {
+    state.initialize();
+  }
+
   /// Case width / height (It's a square)
   double caseWidth;
 
@@ -64,13 +70,16 @@ class SnakeGame extends StatefulWidget {
   }) : super(
           key: key,
         ) {
-    if (numberCaseVertically < 10 || numberCaseHorizontally < 10) {
+    if (numberCaseVertically < 4 || numberCaseHorizontally < 4) {
       throw ("Error SnakeGame: numberCaseVertically and numberCaseHorizontally can't be inferior of 10");
     }
   }
 
   @override
-  _SnakeGameState createState() => _SnakeGameState();
+  _SnakeGameState createState() {
+    this.state = _SnakeGameState();
+    return this.state;
+  }
 }
 
 class _SnakeGameState extends State<SnakeGame> {
@@ -87,6 +96,10 @@ class _SnakeGameState extends State<SnakeGame> {
   void initState() {
     super.initState();
 
+    initialize();
+  }
+
+  void initialize() {
     /// Init the board
     _board = SnakeBoard(
       numberCaseHorizontally: widget.numberCaseHorizontally,
@@ -97,14 +110,14 @@ class _SnakeGameState extends State<SnakeGame> {
     /// Init the controller
     if (controller == null) {
       controller = StreamController<SNAKE_MOVE>();
+      /// and listen the events
+      controller?.stream.listen((value) {
+        _moveSnake(value);
+      });
     }
 
-    /// and listen the events
-    controller?.stream.listen((value) {
-      _moveSnake(value);
-    });
-
     /// Defines the loop for the game
+    timer?.cancel();
     timer = Timer.periodic(widget.durationBetweenTicks, (Timer t) {
       controller?.add(widget.getDirection);
       widget.nextDirection = SNAKE_MOVE.front;
