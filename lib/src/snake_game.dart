@@ -149,6 +149,9 @@ class _SnakeGameState extends State<SnakeGame> {
   _moveSnake(SNAKE_MOVE direction) {
     /// move the snake on the board
     GAME_EVENT? event = _board?.moveSnake(direction);
+    if (!mounted) {
+      return;
+    }
     setState(() {});
 
     /// Check if a special event is returned
