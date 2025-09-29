@@ -98,7 +98,7 @@ class _SnakeGameState extends State<SnakeGame> {
   SnakeBoard? _board;
 
   /// Loop for the game
-  Timer? timer;
+  static Timer? timer;
 
   @override
   void initState() {
