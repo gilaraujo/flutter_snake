@@ -25,6 +25,9 @@ class SnakeGame extends StatefulWidget {
   void pause() {
     state.pause();
   }
+  SnakeBoard? currentBoard() {
+    return state._board;
+  }
 
   /// Case width / height (It's a square)
   double caseWidth;
