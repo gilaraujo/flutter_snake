@@ -56,7 +56,7 @@ class SnakeGame extends StatefulWidget {
   final String? snakeFruitImgPath;
   final String? snakeBombImgPath;
   final bool bombEnabled;
-  final SnakeBoard? current;
+  SnakeBoard? current;
 
   SnakeGame({
     Key? key,
