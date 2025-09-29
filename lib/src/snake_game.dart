@@ -53,6 +53,7 @@ class SnakeGame extends StatefulWidget {
   final String? snakeFruitImgPath;
   final String? snakeBombImgPath;
   final bool bombEnabled;
+  final SnakeBoard? current;
 
   SnakeGame({
     Key? key,
@@ -70,6 +71,7 @@ class SnakeGame extends StatefulWidget {
     this.snakeHeadImgPath,
     this.snakeBombImgPath,
     this.bombEnabled = false,
+    this.current,
   }) : super(
           key: key,
         ) {
@@ -104,7 +106,7 @@ class _SnakeGameState extends State<SnakeGame> {
 
   void initialize() {
     /// Init the board
-    _board = SnakeBoard(
+    _board = widget.current ?? SnakeBoard(
       numberCaseHorizontally: widget.numberCaseHorizontally,
       numberCaseVertically: widget.numberCaseVertically,
       bombEnabled: widget.bombEnabled,
