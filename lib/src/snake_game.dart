@@ -117,11 +117,7 @@ class _SnakeGameState extends State<SnakeGame> {
 
     /// Init the controller
     if (controller == null) {
-      controller = StreamController<SNAKE_MOVE>();
-      /// and listen the events
-      controller?.stream.listen((value) {
-        _moveSnake(value);
-      });
+      _initController();
     }
 
     /// Defines the loop for the game
@@ -133,6 +129,14 @@ class _SnakeGameState extends State<SnakeGame> {
     timer = Timer.periodic(widget.durationBetweenTicks, (Timer t) {
       controller?.add(widget.getDirection);
       widget.nextDirection = SNAKE_MOVE.front;
+    });
+  }
+
+  void _initController() {
+    controller = StreamController<SNAKE_MOVE>();
+    /// listen the events
+    controller?.stream.listen((value) {
+      _moveSnake(value);
     });
   }
 
@@ -149,6 +153,8 @@ class _SnakeGameState extends State<SnakeGame> {
   void dispose() {
     /// Dispose the timer.
     timer?.cancel();
+    controller?.close();
+    controller = null;
     super.dispose();
   }
 
